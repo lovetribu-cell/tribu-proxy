@@ -42,14 +42,28 @@ export default async function handler(req) {
       });
     }
 
-    // Prompt pour OpenAI
-    const prompt = `Tu es un expert en reconnaissance d'animaux. Retourne uniquement ce JSON strict :
+    // Prompt pour OpenAI - VERSION CORRIGÉE
+    const prompt = `Tu es un expert vétérinaire en reconnaissance de races d'animaux.
+
+Analyse cette image et retourne UNIQUEMENT un JSON valide avec cette structure exacte :
 {
-  "animal": "chien|chat|inconnu",
-  "breed": "string (vide si confiance < ${minConfidence})",
-  "confidence": 0.0,
-  "candidates": [{ "label": "string", "score": 0.0 }]
-}`;
+  "animal": "chien ou chat ou inconnu",
+  "breed": "nom précis de la race en français (ex: Golden Retriever, Berger Allemand, Siamois...)",
+  "confidence": 0.95,
+  "candidates": [
+    { "label": "Golden Retriever", "score": 0.95 },
+    { "label": "Labrador Retriever", "score": 0.85 }
+  ]
+}
+
+RÈGLES IMPORTANTES :
+- Si c'est un chien, mets "chien" dans animal et identifie la race précise
+- Si c'est un chat, mets "chat" dans animal et identifie la race précise
+- Si pas d'animal ou impossible à identifier, mets "inconnu"
+- confidence = ton niveau de certitude entre 0 et 1
+- candidates = liste des 2-3 races les plus probables avec leur score
+- Si confidence < ${minConfidence}, laisse breed vide ""
+- Réponds UNIQUEMENT avec le JSON, aucun texte avant ou après`;
 
     // Appel à OpenAI Vision
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
